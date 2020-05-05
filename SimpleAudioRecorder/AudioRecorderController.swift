@@ -44,6 +44,9 @@ class AudioRecorderController: UIViewController {
         loadAudio()
     }
     
+    private func updateViews() {
+        playButton.isSelected = isPlaying
+    }
     
     // MARK: - Timer
     
@@ -82,7 +85,12 @@ class AudioRecorderController: UIViewController {
     
     // MARK: - Playback
     
-    var audioPlayer: AVAudioPlayer?
+    var audioPlayer: AVAudioPlayer? {
+        didSet {
+            // Using a didSet allows us to make sure we don't forget to set the delegate
+            audioPlayer?.delegate = self
+        }
+    }
     
     var isPlaying: Bool {
         audioPlayer?.isPlaying ?? false
@@ -106,12 +114,13 @@ class AudioRecorderController: UIViewController {
     
     func play() {
         audioPlayer?.play()
+        updateViews()
     }
-    
+
     func pause() {
         audioPlayer?.pause()
+        updateViews()
     }
-    
     
     // MARK: - Recording
     
@@ -186,3 +195,16 @@ class AudioRecorderController: UIViewController {
     }
 }
 
+extension AudioRecorderController: AVAudioPlayerDelegate {
+    
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        updateViews()
+    }
+    
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        if let error = error {
+            print("Audio Player Error: \(error)")
+        }
+        updateViews()
+    }
+}
