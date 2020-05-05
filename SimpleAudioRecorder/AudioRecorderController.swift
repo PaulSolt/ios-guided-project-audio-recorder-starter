@@ -45,6 +45,12 @@ class AudioRecorderController: UIViewController {
         updateViews()
     }
     
+    deinit {
+        // Protects us from a crash if the timer is still going when the user navigates away from the
+        // timer UI
+        cancelTimer()
+    }
+    
     private func updateViews() {
         playButton.isSelected = isPlaying
         
@@ -70,7 +76,7 @@ class AudioRecorderController: UIViewController {
     var timer: Timer?
 
     func startTimer() {
-        timer?.invalidate()
+        timer?.invalidate() // Cancel a timer before you start a new one!
         
         timer = Timer.scheduledTimer(withTimeInterval: 0.030, repeats: true) { [weak self] (_) in
             guard let self = self else { return }
