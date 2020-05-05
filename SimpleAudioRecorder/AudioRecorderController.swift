@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 class AudioRecorderController: UIViewController {
     
@@ -81,10 +82,18 @@ class AudioRecorderController: UIViewController {
     
     // MARK: - Playback
     
+    var audioPlayer: AVAudioPlayer?
+    
+    var isPlaying: Bool {
+        audioPlayer?.isPlaying ?? false
+    }
+    
     func loadAudio() {
+        // App Bundle is read-only (Download from the App Store - or install from Xcode)
+        // Documents directory is read-write
         let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3")!
         
-        
+        audioPlayer = try? AVAudioPlayer(contentsOf: songURL)
     }
     
     /*
@@ -96,11 +105,11 @@ class AudioRecorderController: UIViewController {
     */
     
     func play() {
-        
+        audioPlayer?.play()
     }
     
     func pause() {
-        
+        audioPlayer?.pause()
     }
     
     
@@ -161,7 +170,11 @@ class AudioRecorderController: UIViewController {
     // MARK: - Actions
     
     @IBAction func togglePlayback(_ sender: Any) {
-        
+        if isPlaying { // isPlaying == true
+            pause()
+        } else {
+            play()
+        }
     }
     
     @IBAction func updateCurrentTime(_ sender: UISlider) {
