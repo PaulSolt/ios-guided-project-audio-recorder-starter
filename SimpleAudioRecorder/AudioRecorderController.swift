@@ -85,7 +85,8 @@ class AudioRecorderController: UIViewController {
     
     private func updateViews() {
         playButton.isSelected = isPlaying
-        
+        recordButton.isSelected = isRecording
+
         // TODO: Extract into helper computed properties
         let elapsedTime = audioPlayer?.currentTime ?? 0
         let duration = audioPlayer?.duration ?? 0
@@ -218,10 +219,12 @@ class AudioRecorderController: UIViewController {
         audioRecorder?.delegate = self
         audioRecorder?.record()
         self.recordingURL = recordingURL
+        updateViews()
     }
 
     func stopRecording() {
         audioRecorder?.stop()
+        updateViews()
     }
     
     // MARK: - Actions
@@ -276,11 +279,13 @@ extension AudioRecorderController: AVAudioRecorderDelegate {
             
             audioPlayer = try? AVAudioPlayer(contentsOf: recordingURL) // TODO: errors
         }
+        updateViews()
     }
     
     func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
         if let error = error {
             print("Error recording: \(error)")
         }
+        updateViews()
     }
 }
