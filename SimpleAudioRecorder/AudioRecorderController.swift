@@ -46,6 +46,13 @@ class AudioRecorderController: UIViewController {
         loadAudio()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        try? prepareAudioSession()
+        updateViews()
+    }
+    
     deinit {
         // Stop all timers if this screen is not visible
         cancelTimer()
@@ -120,13 +127,11 @@ class AudioRecorderController: UIViewController {
         audioPlayer = try? AVAudioPlayer(contentsOf: songURL) // will be nil if this fails
     }
     
-    /*
     func prepareAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.playAndRecord, options: [.defaultToSpeaker])
-        try session.setActive(true, options: []) // can fail if on a phone call, for instance
+        try session.setActive(true, options: [])  // can fail if on a phone call, for instance
     }
-    */
     
     // FIXME: pause button doesn't reset after audio finishes
     func togglePlayback() { // business/app logic
