@@ -150,18 +150,24 @@ class AudioRecorderController: UIViewController {
     
     // MARK: - Recording
     
+    var recordingURL: URL?
+    var audioRecorder: AVAudioRecorder?
+    
+    var isRecording: Bool {
+        audioRecorder?.isRecording ?? false
+    }
+    
     func createNewRecordingURL() -> URL {
         let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         
         let name = ISO8601DateFormatter.string(from: Date(), timeZone: .current, formatOptions: .withInternetDateTime)
         let file = documents.appendingPathComponent(name, isDirectory: false).appendingPathExtension("caf")
         
-//        print("recording URL: \(file)")
+        print("recording URL: \(file)")
         
         return file
     }
     
-    /*
     func requestPermissionOrStartRecording() {
         switch AVAudioSession.sharedInstance().recordPermission {
         case .undetermined:
@@ -192,14 +198,30 @@ class AudioRecorderController: UIViewController {
             break
         }
     }
-    */
+
+    func toggleRecording() {
+        if isRecording {
+            stopRecording()
+        } else {
+            requestPermissionOrStartRecording()
+        }
+    }
+
+    // TODO: start/cancel timer?
     
     func startRecording() {
+        let recordingURL = createNewRecordingURL()
         
+        // 44,100 hertz = 44.1 kHz = FM / CD quality audio
+        let audioFormat = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1)! // programmer error, add error message or log
+        audioRecorder = try? AVAudioRecorder(url: recordingURL, format: audioFormat)
+        audioRecorder?.delegate = self
+        audioRecorder?.record()
+        self.recordingURL = recordingURL
     }
-    
+
     func stopRecording() {
-        
+        audioRecorder?.stop()
     }
     
     // MARK: - Actions
@@ -213,7 +235,7 @@ class AudioRecorderController: UIViewController {
     }
     
     @IBAction func toggleRecording(_ sender: Any) {
-        
+        toggleRecording()
     }
 }
 
@@ -244,5 +266,21 @@ extension AudioRecorderController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         // calculateValues()
         return true // false if not valid input
+    }
+}
+
+extension AudioRecorderController: AVAudioRecorderDelegate {
+    func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        if let recordingURL = recordingURL {
+            print("Finished recording: \(recordingURL.path)")
+            
+            audioPlayer = try? AVAudioPlayer(contentsOf: recordingURL) // TODO: errors
+        }
+    }
+    
+    func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
+        if let error = error {
+            print("Error recording: \(error)")
+        }
     }
 }
