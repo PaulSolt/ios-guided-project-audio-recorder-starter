@@ -85,7 +85,11 @@ class AudioRecorderController: UIViewController {
     
     // MARK: - Playback
     
-    var audioPlayer: AVAudioPlayer?
+    var audioPlayer: AVAudioPlayer? {
+        didSet {
+            audioPlayer?.delegate = self // tell me when it finishes playing / errors
+        }
+    }
     
     var isPlaying: Bool {
         return audioPlayer?.isPlaying ?? false
@@ -107,6 +111,7 @@ class AudioRecorderController: UIViewController {
     }
     */
     
+    // FIXME: pause button doesn't reset after audio finishes
     func togglePlayback() { // business/app logic
         if isPlaying {
             pause()
@@ -195,3 +200,32 @@ class AudioRecorderController: UIViewController {
     }
 }
 
+// Delegate
+// Asking someone else to do something for you
+// 1. action/event: Pickup a coffee - Starbucks
+// 2. question: darkMode?
+
+extension AudioRecorderController: AVAudioPlayerDelegate {
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        DispatchQueue.main.async {
+            self.updateViews()
+        }
+    }
+    
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        if let error = error {
+            print(error)
+        }
+        DispatchQueue.main.async {
+            self.updateViews()
+        }
+    }
+}
+
+extension AudioRecorderController: UITextFieldDelegate {
+    // Question
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        // calculateValues()
+        return true // false if not valid input
+    }
+}
