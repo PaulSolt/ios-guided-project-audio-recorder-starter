@@ -11,6 +11,8 @@ import AVFoundation
 
 class AudioRecorderController: UIViewController {
     
+    private var timer: Timer?
+    
     @IBOutlet var playButton: UIButton!
     @IBOutlet var recordButton: UIButton!
     @IBOutlet var timeElapsedLabel: UILabel!
@@ -44,10 +46,13 @@ class AudioRecorderController: UIViewController {
         loadAudio()
     }
     
+    deinit {
+        // Stop all timers if this screen is not visible
+        cancelTimer()
+    }
     
     // MARK: - Timer
     
-    /*
     func startTimer() {
         timer?.invalidate()
         
@@ -56,31 +61,38 @@ class AudioRecorderController: UIViewController {
             
             self.updateViews()
             
-            if let audioRecorder = self.audioRecorder,
-                self.isRecording == true {
-                
-                audioRecorder.updateMeters()
-                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
-                
-            }
-            
-            if let audioPlayer = self.audioPlayer,
-                self.isPlaying == true {
-            
-                audioPlayer.updateMeters()
-                self.audioVisualizer.addValue(decibelValue: audioPlayer.averagePower(forChannel: 0))
-            }
+    //            if let audioRecorder = self.audioRecorder,
+    //                self.isRecording == true {
+    //
+    //                audioRecorder.updateMeters()
+    //                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
+    //
+    //            }
+    //
+    //            if let audioPlayer = self.audioPlayer,
+    //                self.isPlaying == true {
+    //
+    //                audioPlayer.updateMeters()
+    //                self.audioVisualizer.addValue(decibelValue: audioPlayer.averagePower(forChannel: 0))
+    //            }
         }
     }
-    
+
     func cancelTimer() {
         timer?.invalidate()
         timer = nil
     }
-    */
     
     private func updateViews() {
         playButton.isSelected = isPlaying
+        
+        // TODO: Extract into helper computed properties
+        let elapsedTime = audioPlayer?.currentTime ?? 0
+        let duration = audioPlayer?.duration ?? 0
+        let timeRemaining: TimeInterval = duration - elapsedTime
+        
+        timeElapsedLabel.text = timeIntervalFormatter.string(from: elapsedTime)
+        timeRemainingLabel.text = timeIntervalFormatter.string(from: timeRemaining)
     }
     
     // MARK: - Playback
@@ -122,14 +134,15 @@ class AudioRecorderController: UIViewController {
 
     func play() {
         audioPlayer?.play() // don't crash if player is nil ... if nothing to play, just don't do anything
+        startTimer()
         updateViews()
     }
 
     func pause() {
         audioPlayer?.pause()
+        cancelTimer()
         updateViews()
     }
-    
     
     // MARK: - Recording
     
