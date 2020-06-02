@@ -93,6 +93,10 @@ class AudioRecorderController: UIViewController {
         
         timeElapsedLabel.text = timeIntervalFormatter.string(from: elapsedTime)
         timeRemainingLabel.text = timeIntervalFormatter.string(from: timeRemaining)
+        
+        timeSlider.minimumValue = 0
+        timeSlider.maximumValue = Float(duration)
+        timeSlider.value = Float(elapsedTime)
     }
     
     // MARK: - Playback
