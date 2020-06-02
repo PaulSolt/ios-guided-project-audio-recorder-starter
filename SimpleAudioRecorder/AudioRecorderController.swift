@@ -89,7 +89,7 @@ class AudioRecorderController: UIViewController {
         // TODO: Extract into helper computed properties
         let elapsedTime = audioPlayer?.currentTime ?? 0
         let duration = audioPlayer?.duration ?? 0
-        let timeRemaining: TimeInterval = duration - elapsedTime
+        let timeRemaining: TimeInterval = round(duration) - elapsedTime
         
         timeElapsedLabel.text = timeIntervalFormatter.string(from: elapsedTime)
         timeRemainingLabel.text = timeIntervalFormatter.string(from: timeRemaining)
