@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 class AudioRecorderController: UIViewController {
     
@@ -81,10 +82,18 @@ class AudioRecorderController: UIViewController {
     
     // MARK: - Playback
     
+    var audioPlayer: AVAudioPlayer?
+    
+    var isPlaying: Bool {
+        return audioPlayer?.isPlaying ?? false
+    }
+    
     func loadAudio() {
-        let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3")!
+        let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3")! // Crash early if we are missing a resource that a programmer added
         
-        
+        // FUTURE: Do more error checking and fail early if programmer error,
+        // or present a message to the user
+        audioPlayer = try? AVAudioPlayer(contentsOf: songURL) // will be nil if this fails
     }
     
     /*
@@ -95,12 +104,20 @@ class AudioRecorderController: UIViewController {
     }
     */
     
-    func play() {
-        
+    func togglePlayback() { // business/app logic
+        if isPlaying {
+            pause()
+        } else {
+            play()
+        }
     }
-    
+
+    func play() {
+        audioPlayer?.play() // don't crash if player is nil ... if nothing to play, just don't do anything
+    }
+
     func pause() {
-        
+        audioPlayer?.pause()
     }
     
     
@@ -161,7 +178,7 @@ class AudioRecorderController: UIViewController {
     // MARK: - Actions
     
     @IBAction func togglePlayback(_ sender: Any) {
-        
+        togglePlayback()
     }
     
     @IBAction func updateCurrentTime(_ sender: UISlider) {
